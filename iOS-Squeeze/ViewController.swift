@@ -16,10 +16,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	let model = SqueezeNet()
 
 	override func viewDidLoad() {
-		super.viewDidLoad()
-
-		imageView.image = UIImage(named: "ort.jpg")
-		label.text      = "Analyze steht noch aus"
+		super .viewDidLoad()
+		self.imageView.image = UIImage(named: "ort.jpg")
+		self.label.text      = "Analyze steht noch aus"
 	}
 
 	//******************************************************************************************************************
@@ -28,6 +27,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	func analyze(_ image :UIImage) {
 
 		self.imageView.image = image
+		self.label.text      = "Neues Bild"
 
 		//let buffer = pixelBuffer(from: image)
 
