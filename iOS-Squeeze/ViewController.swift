@@ -18,7 +18,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	override func viewDidLoad() {
 		super .viewDidLoad()
 		self.imageView.image = UIImage(named: "ort.jpg")
-		self.label.text      = "Analyze steht noch aus"
+		analyze(self.imageView.image!)
 	}
 
 	//******************************************************************************************************************
@@ -27,18 +27,19 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	func analyze(_ image :UIImage) {
 
 		self.imageView.image = image
-		self.label.text      = "Neues Bild"
+		self.label.text      = "Analyse läuft …"
 
-		//let buffer = pixelBuffer(from: image)
+		let scaledImage = self.scale(image: image, toSize: CGSize(width: 227, height: 227))
+		let buffer      = self.pixelBuffer(withImage: scaledImage)
 
-//		if let prediction = try? self.model.prediction(image: buffer) {
-//			print ("Dies ist ein \(prediction.classLabel)")
-//			self.label.text = prediction.classLabel
-//		}
+		if let prediction = try? self.model.prediction(image: buffer!) {
+			self.label.text = prediction.classLabel
+		}
+
 	}
 
 	//******************************************************************************************************************
-	//* MARK: - Bild laden/aufnehmen/konvertieren
+	//* MARK: - Bild laden/aufnehmen
 	//******************************************************************************************************************
 	@IBAction func getImage(_ sender: Any) {
 		let imagePickerController = UIImagePickerController()
@@ -62,10 +63,35 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		picker.dismiss(animated: true, completion: nil)
 	}
 
-//	func pixelBuffer(from image:UIImage) -> CVPixelBuffer {
-//
-//	}
+	//******************************************************************************************************************
+	//* MARK: - Bild skalieren/konvertieren
+	//******************************************************************************************************************
+	func scale(image:UIImage, toSize newSize:CGSize) -> UIImage{
+		UIGraphicsBeginImageContextWithOptions(newSize, false, image.scale);
+		image.draw(in: CGRect(origin: CGPoint.zero, size: CGSize(width: newSize.width, height: newSize.height)))
+		let scaledImage:UIImage = UIGraphicsGetImageFromCurrentImageContext()!
+		UIGraphicsEndImageContext()
+		return scaledImage
+	}
 
+	func pixelBuffer(withImage image:UIImage) -> CVPixelBuffer? {
+		guard let cgimage = image.cgImage else {
+			return nil
+		}
 
+		//neuen PixelBuffer anlegen
+		var pixelBuffer:CVPixelBuffer? = nil
+		let status = CVPixelBufferCreate(kCFAllocatorDefault, Int(cgimage.width), Int(cgimage.height), kCVPixelFormatType_32BGRA , nil, &pixelBuffer)
+		if status != kCVReturnSuccess {
+			return nil
+		}
+
+		//Pixelbuffer füllen
+		let ciimage = CIImage.init(cgImage: cgimage)
+		let context = CIContext.init()
+		context.render(ciimage, to:pixelBuffer!)
+
+		return pixelBuffer
+	}
 }
 
