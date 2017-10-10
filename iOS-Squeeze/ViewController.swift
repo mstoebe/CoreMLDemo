@@ -8,17 +8,63 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+
+	@IBOutlet weak var imageView: UIImageView!
+	@IBOutlet weak var label: UILabel!
+
+	let model = SqueezeNet()
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
-		// Do any additional setup after loading the view, typically from a nib.
+
+		imageView.image = UIImage(named: "ort.jpg")
+		label.text      = "Analyze steht noch aus"
 	}
 
-	override func didReceiveMemoryWarning() {
-		super.didReceiveMemoryWarning()
-		// Dispose of any resources that can be recreated.
+	//******************************************************************************************************************
+	//* MARK: - Bildanalyse
+	//******************************************************************************************************************
+	func analyze(_ image :UIImage) {
+
+		self.imageView.image = image
+
+		//let buffer = pixelBuffer(from: image)
+
+//		if let prediction = try? self.model.prediction(image: buffer) {
+//			print ("Dies ist ein \(prediction.classLabel)")
+//			self.label.text = prediction.classLabel
+//		}
 	}
+
+	//******************************************************************************************************************
+	//* MARK: - Bild laden/aufnehmen/konvertieren
+	//******************************************************************************************************************
+	@IBAction func getImage(_ sender: Any) {
+		let imagePickerController = UIImagePickerController()
+		if UIImagePickerController.isSourceTypeAvailable(.camera) {
+			imagePickerController.sourceType = .camera
+		}
+		imagePickerController.delegate = self
+		imagePickerController.allowsEditing = true
+		present(imagePickerController, animated: true, completion: nil)
+	}
+
+	func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+		guard let image = info[UIImagePickerControllerEditedImage] as? UIImage else {
+			return
+		}
+		analyze(image)
+		picker.dismiss(animated: true, completion: nil)
+	}
+
+	func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+		picker.dismiss(animated: true, completion: nil)
+	}
+
+//	func pixelBuffer(from image:UIImage) -> CVPixelBuffer {
+//
+//	}
 
 
 }
